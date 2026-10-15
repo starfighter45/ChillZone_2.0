@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChillZone — Access Portal</title>
+  <style>
+    :root {
+      --void: #070816; --navy: #0d1030; --plum: #1b0f3f; --violet: #8b5cf6;
+      --lavender: #c4b5fd; --cyan: #67e8f9; --pink: #f9a8d4; --text: #eef0ff;
+      --muted: #aab0d6; --glass: rgba(22,24,64,.55); --line: rgba(196,181,253,.22);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 700px at 80% -10%, var(--plum), transparent 60%),
+                  radial-gradient(900px 600px at 0% 40%, #14123f, transparent 60%), var(--void);
+      background-attachment: fixed; min-height: 100vh; color: var(--text);
+      display: grid; place-items: center; padding: 1.5rem;
+    }
+    .portal-card {
+      background: var(--glass); border: 1px solid var(--line); border-radius: 22px;
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      padding: 2.5rem; max-width: 520px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    h1 { font-size: 1.8rem; margin: 0 0 0.5rem; background: linear-gradient(120deg, #fff, var(--lavender)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    p.sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .terms-box {
+      background: rgba(7,8,22,0.6); border: 1px solid var(--line); border-radius: 12px;
+      padding: 1rem; font-size: 0.85rem; color: var(--muted); max-height: 130px;
+      overflow-y: auto; margin-bottom: 1.25rem; line-height: 1.4;
+    }
+    .checkbox-label {
+      display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;
+      font-size: 0.95rem; font-weight: 500; user-select: none;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 20px; height: 20px; accent-color: var(--violet); cursor: pointer; margin-top: 1px;
+    }
+    .status-badge {
+      margin-top: 1.25rem; padding: 0.6rem 1rem; border-radius: 10px; font-size: 0.85rem;
+      background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: var(--lavender);
+      display: flex; align-items: center; justify-content: space-between; word-break: break-all;
+    }
+    .manual-link { color: var(--cyan); text-decoration: none; font-weight: 600; white-space: nowrap; margin-left: 0.5rem; }
+    .manual-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="portal-card">
+    <h1>✨ ChillZone Gate</h1>
+    <p class="sub">Accept terms to generate an in-memory sandbox and launch your space hub.</p>
+
+    <div class="terms-box">
+      <strong>Terms & Conditions:</strong><br>
+      1. ChillZone runs inside a temporary browser <code>blob:</code> sandbox.<br>
+      2. No external network data is tracked or logged during your session.<br>
+      3. Closing the tab immediately destroys the in-memory object URL.
+    </div>
+
+    <label class="checkbox-label">
+      <input type="checkbox" id="termsCheck">
+      <span>I agree to the terms and wish to launch the ChillZone Blob URL</span>
+    </label>
+
+    <div class="status-badge" id="statusArea">
+      <span id="statusText">Waiting for checkmark...</span>
+      <a href="#" id="openManual" class="manual-link" style="display:none;" target="_blank">Open Tab</a>
+    </div>
+  </div>
+
+  <script>
+    // Embedded HTML source for ChillZone
+    const chillZoneHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChillZone</title>
+<meta name="theme-color" content="#070816">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27 viewBox=%270 0 100 100%27%3E%3Cdefs%3E%3ClinearGradient id=%27p%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop stop-color=%27%23c4b5fd%27/%3E%3Cstop offset=%271%27 stop-color=%27%2367e8f9%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%23070816%27/%3E%3Cellipse cx=%2750%27 cy=%2750%27 rx=%2741%27 ry=%2715%27 fill=%27none%27 stroke=%27%23f9a8d4%27 stroke-width=%276%27 transform=%27rotate(-25 50 50)%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2723%27 fill=%27url(%23p)%27/%3E%3Ccircle cx=%2777%27 cy=%2720%27 r=%274%27 fill=%27%23ffffff%27/%3E%3Ccircle cx=%2720%27 cy=%2775%27 r=%273%27 fill=%27%2367e8f9%27/%3E%3C/svg%3E">
+<style>
+:root{
+  --void:#070816; --navy:#0d1030; --plum:#1b0f3f; --violet:#8b5cf6; --lavender:#c4b5fd;
+  --cyan:#67e8f9; --pink:#f9a8d4; --text:#eef0ff; --muted:#aab0d6;
+  --glass:rgba(22,24,64,.55); --line:rgba(196,181,253,.22);
+  --display:'Trebuchet MS',system-ui,sans-serif; --body:'Segoe UI',system-ui,sans-serif; --radius:22px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:var(--body);font-size:1.0625rem;line-height:1.6;color:var(--text);
+  background:radial-gradient(1200px 700px at 80% -10%,var(--plum),transparent 60%),
+             radial-gradient(900px 600px at 0% 40%,#14123f,transparent 60%),var(--void);
+  background-attachment:fixed;min-height:100vh;overflow-x:hidden;
+}
+h1,h2{font-family:var(--display);line-height:1.15;margin:0;font-weight:700}
+p{margin:0 0 1rem}
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(7,8,22,.72);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1180px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between}
+.logo{text-decoration:none;color:var(--text);font-family:var(--display);font-weight:700;font-size:1.15rem}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.25rem}
+.hero{min-height:calc(100vh - 60px);display:flex;align-items:center;padding:3rem 0}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+.welcome{display:inline-block;background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:.4rem 1rem;color:var(--lavender);font-size:.95rem;margin-bottom:1.4rem}
+.hero h1{font-size:clamp(2.6rem,7vw,5rem);background:linear-gradient(120deg,#fff 10%,var(--lavender) 50%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:.5rem}
+.hero h2{font-weight:500;font-size:clamp(1.3rem,3vw,1.8rem);color:var(--cyan);margin-bottom:1.1rem}
+.lead{color:var(--muted);font-size:1.15rem}
+.btn.primary{background:linear-gradient(135deg,var(--violet),#6366f1 55%,#22d3ee);color:#fff;padding:.8rem 1.35rem;border-radius:999px;text-decoration:none;font-weight:600;display:inline-block;margin-top:1rem;box-shadow:0 8px 30px rgba(99,102,241,.45)}
+.planet-svg{width:100%;max-width:440px;height:auto;filter:drop-shadow(0 0 50px rgba(139,92,246,.4))}
+@keyframes float{50%{transform:translateY(-12px)}}
+.float{animation:float 6s ease-in-out infinite}
+</style>
+</head>
+<body>
+<header class="nav"><div class="nav-in"><a href="#" class="logo">ChillZone</a></div></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="welcome">✨ Welcome to Orbit</span>
+        <h1>ChillZone</h1>
+        <h2>Study Space & Games</h2>
+        <p class="lead">A cozy corner of outer space for students: browser games, space videos and a break timer.</p>
+        <a href="#" class="btn primary">Launch Hub</a>
+      </div>
+      <div>
+        <svg class="planet-svg float" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="28" fill="#8b5cf6" />
+          <ellipse cx="50" cy="50" rx="44" ry="14" fill="none" stroke="#f9a8d4" stroke-width="5" transform="rotate(-25 50 50)" />
+        </svg>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>`;
+
+    let activeBlobUrl = null;
+    const checkbox = document.getElementById('termsCheck');
+    const statusText = document.getElementById('statusText');
+    const openManual = document.getElementById('openManual');
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        // Clean up previous blob if any
+        if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
+
+        // Create new blob URL
+        const blob = new Blob([chillZoneHTML], { type: 'text/html' });
+        activeBlobUrl = URL.createObjectURL(blob);
+
+        statusText.textContent = 'Blob generated! Opening tab...';
+        openManual.href = activeBlobUrl;
+        openManual.style.display = 'inline';
+
+        // Attempt automatic popup (fallback link provided if blocked)
+        const newTab = window.open(activeBlobUrl, '_blank');
+        if (!newTab) {
+          statusText.textContent = 'Popup blocked—click "Open Tab" manually:';
+        }
+      } else {
+        if (activeBlobUrl) {
+          URL.revokeObjectURL(activeBlobUrl);
+          activeBlobUrl = null;
+        }
+        statusText.textContent = 'Waiting for checkmark...';
+        openManual.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
